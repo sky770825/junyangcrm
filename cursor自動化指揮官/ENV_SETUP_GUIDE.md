@@ -54,6 +54,15 @@ supabase login
 4. 複製 API key → `OPENAI_API_KEY`
 5. ⚠️ 注意：API key 只會顯示一次，請妥善保存
 
+### 步驟 5: 獲取 Cloudflare API Token
+
+1. 前往：https://dash.cloudflare.com/profile/api-tokens
+2. 點擊 "Create Token"
+3. 選擇適當的權限（建議：Zone DNS Edit, Zone Cache Purge）
+4. 複製 API Token → `CLOUDFLARE_API_TOKEN`
+5. 從 Dashboard URL 取得 Account ID → `CLOUDFLARE_ACCOUNT_ID`
+   - 格式：`https://dash.cloudflare.com/{ACCOUNT_ID}/...`
+
 ## 📝 建立環境變數檔案
 
 ```bash

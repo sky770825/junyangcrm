@@ -19,6 +19,11 @@
       "id": "rag-pipeline",
       "name": "RAG 資料處理管線",
       "description": "資料擷取、embedding 生成、upsert 到 Supabase"
+    },
+    {
+      "id": "cloudflare-deployment",
+      "name": "Cloudflare 部署自動化",
+      "description": "Cloudflare Pages/Workers 部署、DNS 管理、快取清除"
     }
   ],
   "commands": [
@@ -59,6 +64,33 @@
       "command": "supabase db push",
       "usage": "在專案根目錄執行：supabase db push",
       "tags": ["supabase", "migration", "database"]
+    },
+    {
+      "id": "cloudflare-deploy",
+      "category": "cloudflare-deployment",
+      "name": "Cloudflare Pages 部署",
+      "description": "自動部署 Next.js 專案到 Cloudflare Pages",
+      "command": "npx wrangler pages deploy .next --project-name=junyangcrm",
+      "usage": "在專案根目錄執行，需要先 build：npm run build",
+      "tags": ["cloudflare", "deployment", "pages"]
+    },
+    {
+      "id": "cloudflare-purge-cache",
+      "category": "cloudflare-deployment",
+      "name": "清除 Cloudflare 快取",
+      "description": "清除 Cloudflare CDN 快取",
+      "command": "node cursor自動化指揮官/scripts/cloudflare-purge.mjs",
+      "usage": "清除指定域名的快取",
+      "tags": ["cloudflare", "cache", "cdn"]
+    },
+    {
+      "id": "cloudflare-dns-update",
+      "category": "cloudflare-deployment",
+      "name": "更新 DNS 記錄",
+      "description": "使用 Cloudflare API 更新 DNS 記錄",
+      "command": "node cursor自動化指揮官/scripts/cloudflare-dns.mjs",
+      "usage": "更新或建立 DNS 記錄",
+      "tags": ["cloudflare", "dns", "domain"]
     }
   ],
   "file_structure": {
