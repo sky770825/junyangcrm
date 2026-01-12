@@ -41,7 +41,8 @@
     "app/**/*.ts",
     "app/**/*.tsx",
     "lib/**/*.ts",
-    "lib/**/*.tsx"
+    "lib/**/*.tsx",
+    "types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

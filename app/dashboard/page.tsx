@@ -1,24 +1,26 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import TaskCard from '@/app/components/TaskCard'
 import CompleteTaskModal from '@/app/components/CompleteTaskModal'
 import type { TaskWithClient } from '@/app/types/database'
 import { isOverdue } from '@/app/lib/utils'
+import AuthButton from '@/app/components/AuthButton'
 
 export default function DashboardPage() {
+  const { data: session } = useSession()
   const [tasks, setTasks] = useState<TaskWithClient[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedTask, setSelectedTask] = useState<TaskWithClient | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [error, setError] = useState('')
 
-  // TODO: Get actual user ID from auth
-  const agentId = '00000000-0000-0000-0000-000000000000' // Placeholder
-
   useEffect(() => {
-    loadTasks()
-  }, [])
+    if (session) {
+      loadTasks()
+    }
+  }, [session])
 
   const loadTasks = async () => {
     try {
@@ -96,12 +98,15 @@ export default function DashboardPage() {
               <h1 className="text-3xl font-bold text-gray-900">任務列表</h1>
               <p className="text-gray-600 mt-1">您的待辦事項和已完成任務</p>
             </div>
-            <a
-              href="/dashboard/clients"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              客戶列表
-            </a>
+            <div className="flex items-center gap-3">
+              <a
+                href="/dashboard/clients"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                客戶列表
+              </a>
+              <AuthButton />
+            </div>
           </div>
         </header>
 

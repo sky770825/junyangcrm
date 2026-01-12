@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/app/lib/supabase/server'
+import { getCurrentUser } from '@/app/lib/auth'
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
     const supabase = await createClient()
     const { id } = await params
     const { resultNote, nextFollowupDate } = await request.json()
@@ -36,6 +45,14 @@ export async function POST(
       return NextResponse.json(
         { error: '任務不存在' },
         { status: 404 }
+      )
+    }
+
+    // 验证权限：只有任务的所有者或 manager 可以完成任务
+    if (user.role !== 'manager' && currentTask.agent_id !== user.id) {
+      return NextResponse.json(
+        { error: '您沒有權限完成此任務' },
+        { status: 403 }
       )
     }
 

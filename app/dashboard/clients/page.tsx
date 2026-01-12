@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import ClientRequestModal from '@/app/components/ClientRequestModal'
 import type { Client } from '@/app/types/database'
 
 export default function ClientsPage() {
+  const { data: session } = useSession()
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -13,22 +15,23 @@ export default function ClientsPage() {
   const [filter, setFilter] = useState<'all' | 'available' | 'my'>('available')
 
   useEffect(() => {
-    loadClients()
-  }, [filter])
+    if (session) {
+      loadClients()
+    }
+  }, [filter, session])
 
   const loadClients = async () => {
+    if (!session?.user?.id) return
+
     try {
       setLoading(true)
       setError('')
-      
-      // TODO: Get actual user ID from auth
-      const agentId = '00000000-0000-0000-0000-000000000001'
       
       let url = '/api/clients?status=active'
       if (filter === 'available') {
         // Available clients (no owner)
       } else if (filter === 'my') {
-        url += `&ownerId=${agentId}`
+        url += `&ownerId=${session.user.id}`
       }
 
       const response = await fetch(url)
@@ -49,15 +52,17 @@ export default function ClientsPage() {
   }
 
   const handleRequest = async (clientId: string, requestNote: string) => {
-    // TODO: Get actual user ID from auth
-    const agentId = '00000000-0000-0000-0000-000000000001'
+    if (!session?.user?.id) {
+      setError('請先登入')
+      return
+    }
 
     const response = await fetch('/api/client-requests', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         client_id: clientId,
-        agent_id: agentId,
+        agent_id: session.user.id,
         request_note: requestNote || null
       })
     })
