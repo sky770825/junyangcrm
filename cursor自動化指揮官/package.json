@@ -1,0 +1,25 @@
+{
+  "name": "cursor-automation-commander",
+  "version": "1.0.0",
+  "description": "Cursor 自動化指揮官 - 完整的自動化流程記錄與執行系統",
+  "type": "module",
+  "main": "scripts/automate.mjs",
+  "scripts": {
+    "automate": "node scripts/automate.mjs",
+    "list": "node scripts/automate.mjs list",
+    "analyze": "node scripts/automate.mjs analyze",
+    "setup": "node scripts/automate.mjs setup"
+  },
+  "keywords": [
+    "automation",
+    "cursor",
+    "commander",
+    "rag",
+    "supabase"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
