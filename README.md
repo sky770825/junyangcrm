@@ -1,51 +1,20 @@
-# 常順地產CRM系統 - Real Estate CRM & Activity Tracking System
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-## 專案概述
+# Run and deploy your AI Studio app
 
-這是一個專注於重新激活舊客戶並嚴格執行活動報告期限的房地產CRM系統。
+This contains everything you need to run your app locally.
 
-## 技術棧
+View your app in AI Studio: https://ai.studio/apps/drive/1Kso2PFqw5ssYcykQ3BZx_jGR4HeQNQW5
 
-- **框架**: Next.js 14 (App Router)
-- **語言**: TypeScript
-- **樣式**: Tailwind CSS (移動優先設計)
-- **數據庫**: Supabase (PostgreSQL)
-- **身份驗證**: NextAuth (角色：Admin vs Agent)
+## Run Locally
 
-## 功能特性
+**Prerequisites:**  Node.js
 
-### Agent (用戶)
-- 查看分配的客戶和任務
-- 通過特定表單完成任務
-- 查看任務列表（按到期日期排序）
-- 逾期任務顯示紅色加粗警告
 
-### Manager (管理員)
-- 查看所有數據
-- 分配客戶給代理
-- 查看逾期報告
-- 活動時間線
-- 客戶池管理
-
-## 開始使用
-
-1. 安裝依賴：
-```bash
-npm install
-```
-
-2. 設置環境變數：
-創建 `.env.local` 文件並添加：
-```
-NEXTAUTH_URL=http://localhost:3000
-NEXTAUTH_SECRET=your-secret-key-here
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-```
-
-3. 運行開發服務器：
-```bash
-npm run dev
-```
-
-4. 訪問 http://localhost:3000
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

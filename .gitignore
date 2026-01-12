@@ -39,3 +39,8 @@ cursor自動化指揮官/rag/rag_export/*.jsonl
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# test files
+test-upload.jpg
+test-upload-*.jpg
+test-*.sh

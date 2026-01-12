@@ -6,32 +6,34 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup:r2": "node scripts/auto-setup-r2.js",
+    "verify:r2": "./scripts/verify-r2-config.sh",
+    "test:r2": "./scripts/test-r2-upload.sh"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.1.0",
-    "@supabase/supabase-js": "^2.39.0",
-    "@types/multer": "^2.0.0",
-    "clsx": "^2.1.0",
-    "date-fns": "^3.0.0",
-    "multer": "^2.0.2",
     "next": "^14.2.0",
-    "next-auth": "^4.24.5",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/ssr": "^0.1.0",
+    "next-auth": "^4.24.5",
+    "date-fns": "^3.0.0",
+    "zod": "^3.22.4",
+    "clsx": "^2.1.0",
     "tailwind-merge": "^2.2.0",
-    "xlsx": "^0.18.5",
-    "zod": "^3.22.4"
+    "@aws-sdk/client-s3": "^3.966.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "typescript": "^5",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8",
     "autoprefixer": "^10.4.17",
     "eslint": "^8",
-    "eslint-config-next": "^14.2.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "eslint-config-next": "^14.2.0"
   }
 }

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import AdminHeader from '@/app/components/AdminHeader'
+import DeleteConfirmModal from '@/app/components/DeleteConfirmModal'
+import EditClientModal from '@/app/components/EditClientModal'
 import type { Client, User, UserApplication, ClientRequestWithDetails } from '@/app/types/database'
 
 export default function AdminDashboard() {
@@ -158,6 +160,11 @@ export default function AdminDashboard() {
 function ClientsTab({ clients, onRefresh }: { clients: Client[], onRefresh: () => void }) {
   const [showUpload, setShowUpload] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -190,11 +197,127 @@ function ClientsTab({ clients, onRefresh }: { clients: Client[], onRefresh: () =
     }
   }
 
+  const handleEdit = (client: Client) => {
+    setSelectedClient(client)
+    setIsEditModalOpen(true)
+  }
+
+  const handleDelete = (client: Client) => {
+    setSelectedClient(client)
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedClient) return
+
+    try {
+      setIsDeleting(true)
+      const res = await fetch(`/api/clients/${selectedClient.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || '刪除失敗')
+      }
+
+      setIsDeleteModalOpen(false)
+      setSelectedClient(null)
+      onRefresh()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '刪除失敗')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleSaveClient = async (client: Client) => {
+    try {
+      const res = await fetch(`/api/clients/${client.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(client)
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || '保存失敗')
+      }
+
+      setIsEditModalOpen(false)
+      setSelectedClient(null)
+      onRefresh()
+    } catch (err) {
+      throw err
+    }
+  }
+
+  const handleToggleSelect = (clientId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(clientId)) {
+        next.delete(clientId)
+      } else {
+        next.add(clientId)
+      }
+      return next
+    })
+  }
+
+  const handleSelectAll = () => {
+    if (selectedIds.size === clients.length) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(clients.map(c => c.id)))
+    }
+  }
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return
+
+    if (!confirm(`確定要刪除 ${selectedIds.size} 個客戶嗎？此操作無法復原。`)) {
+      return
+    }
+
+    try {
+      setIsDeleting(true)
+      const deletePromises = Array.from(selectedIds).map(id =>
+        fetch(`/api/clients/${id}`, { method: 'DELETE' })
+      )
+
+      const results = await Promise.allSettled(deletePromises)
+      const failed = results.filter(r => r.status === 'rejected' || 
+        (r.status === 'fulfilled' && !r.value.ok))
+
+      if (failed.length > 0) {
+        alert(`刪除完成，但有 ${failed.length} 個客戶刪除失敗（可能有關聯的任務）`)
+      } else {
+        alert(`成功刪除 ${selectedIds.size} 個客戶`)
+      }
+
+      setSelectedIds(new Set())
+      onRefresh()
+    } catch (err) {
+      alert('批量刪除失敗')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <div>
       <div className="mb-4 flex justify-between items-center">
         <h2 className="text-xl font-semibold">客戶列表 ({clients.length})</h2>
         <div className="flex gap-3">
+          {selectedIds.size > 0 && (
+            <button
+              onClick={handleBatchDelete}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            >
+              {isDeleting ? '刪除中...' : `批量刪除 (${selectedIds.size})`}
+            </button>
+          )}
           <label className="px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700">
             {uploading ? '上傳中...' : '上傳 Excel'}
             <input
@@ -213,24 +336,64 @@ function ClientsTab({ clients, onRefresh }: { clients: Client[], onRefresh: () =
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.size === clients.length && clients.length > 0}
+                    onChange={handleSelectAll}
+                    className="rounded border-gray-300"
+                  />
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">姓名</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">電話</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">標籤</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">所有者</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {clients.map((client) => (
-                <tr key={client.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {client.name}
+                <tr key={client.id} className={selectedIds.has(client.id) ? 'bg-blue-50' : ''}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(client.id)}
+                      onChange={() => handleToggleSelect(client.id)}
+                      className="rounded border-gray-300"
+                    />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      {client.photos && client.photos.length > 0 ? (
+                        <img
+                          src={client.photos[0]}
+                          alt={client.name}
+                          className="w-10 h-10 rounded object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
+                          無照片
+                        </div>
+                      )}
+                      <span className="text-sm font-medium text-gray-900">{client.name}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {client.phone || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {client.tags.join(', ') || '-'}
+                    <div className="flex gap-1 flex-wrap">
+                      {client.tags.map((tag) => (
+                        <span key={tag} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                      {client.tags.length === 0 && '-'}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs rounded-full ${
@@ -241,6 +404,22 @@ function ClientsTab({ clients, onRefresh }: { clients: Client[], onRefresh: () =
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {client.current_owner_id ? '已分配' : '未分配'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(client)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
+                        編輯
+                      </button>
+                      <button
+                        onClick={() => handleDelete(client)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        刪除
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

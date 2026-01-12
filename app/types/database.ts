@@ -22,6 +22,9 @@ export interface Client {
   status: ClientStatus
   last_contact_date: string | null
   notes: string | null
+  photos?: string[]
+  videos?: string[]
+  documents?: string[]
   created_at: string
   updated_at: string
 }
